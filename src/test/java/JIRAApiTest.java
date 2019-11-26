@@ -71,7 +71,7 @@ public class JIRAApiTest {
             delete("https://jira.hillel.it/rest/api/2/issue/" + + "").
             then().
             extract().response();
-    assertEquals(204, response.statusCode());
+    assertEquals(204, response.statusCode());///
 
   }
 }
