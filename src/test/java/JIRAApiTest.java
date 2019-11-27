@@ -1,15 +1,18 @@
+import io.qameta.allure.Feature;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.hamcrest.Matcher;
 import org.hamcrest.text.MatchesPattern;
 import org.testng.annotations.Test;
 import java.util.regex.Pattern;
-import static io.restassured.RestAssured.given;
+
+import static io.restassured.RestAssured.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class JIRAApiTest {
-
-  @Test
+  @Feature("Get Existing Issue")
+  @Test(groups = {"Regression"})
   public void getExistingIssue() {
 
     Response response =
@@ -24,9 +27,10 @@ public class JIRAApiTest {
     assertEquals("WEBINAR-8887", response.path("key"));
     final Matcher<String> matcher = new MatchesPattern(Pattern.compile("[A-Z]+\\-[0-9]+"));
     assertTrue(matcher.matches("WEBINAR-8887"));
+    System.out.println(matcher.matches("WEBINAR-8887"));
   }
-
-  @Test
+  @Feature("Create Issue Jira")
+  @Test(groups = {"Regression"})
   public void createIssue() {
 
     String issueJson = "{\n" +
@@ -55,23 +59,7 @@ public class JIRAApiTest {
             then().
             extract().response();
     assertEquals(201, response.statusCode());
+    System.out.println("Status code:"+response.statusCode());
+  }
   }
 
-  @Test
-  public void deleteIssue() {
-
-    // TODO 1) Create Issue
-    // TODO 2) response.path("")  вытащить из ответа номер тикета
-    // TODO 3) удалить тикет
-    //TODO 4) попробовать получить тикет и получить 404
-
-    Response response = given().
-            auth().preemptive().basic("webinar5", "webinar5").
-            when().
-            delete("https://jira.hillel.it/rest/api/2/issue/" + + "").
-            then().
-            extract().response();
-    assertEquals(204, response.statusCode());///
-
-  }
-}
