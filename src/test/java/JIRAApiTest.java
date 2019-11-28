@@ -15,15 +15,14 @@ public class JIRAApiTest {
   @Test(groups = {"Regression"})
   public void getExistingIssue() {
 
-    Response response =
-            given().
+    Response response = given().
                     auth().preemptive().basic("webinar5", "webinar5").
                     when().
                     get("http://jira.hillel.it/rest/api/2/issue/WEBINAR-8887").
                     then().
                     extract().response();
 
-    assertEquals(200, response.statusCode());
+    assertEquals( response.statusCode(),200);
     assertEquals("WEBINAR-8887", response.path("key"));
     final Matcher<String> matcher = new MatchesPattern(Pattern.compile("[A-Z]+\\-[0-9]+"));
     assertTrue(matcher.matches("WEBINAR-8887"));
@@ -32,36 +31,20 @@ public class JIRAApiTest {
 
   @Feature("Create Issue Jira")
   @Test(groups = {"Regression"})
-  public void createAndDeleteIssue() throws InterruptedException {
+  public void createAndDeleteIssue(){
 
     String credentialsJSON = "{" +
             "\"username\": \"webinar5\"," +
             "\"password\": \"webinar5\"" +
             "} ";
 
-    String issueJson = "{\n" +
-            "    \"fields\": {\n" +
-            "        \"project\": {\n" +
-            "            \"id\": \"11400\"\n" +
-            "        },\n" +
-            "        \"summary\": \"Test API\",\n" +
-            "        \"issuetype\": {\n" +
-            "            \"name\": \"Bug\"\n" +
-            "        },\n" +
-            "        \"assignee\": {\n" +
-            "            \"name\": \"webinar5\"\n" +
-            "        },\n" +
-            "        \"reporter\": {\n" +
-            "            \"name\": \"webinar5\"\n" +
-            "        }\n" +
-            "    }\n" +
-            "}";
+    String issueJSON = JiraJSONObjects.newIssueJSON();;// заменяем код с body из postman на JiraJSONObjects.newIssueJSON() из JiraJSONObjects класса
 
-        //create issue
+           //create issue
     Response response = given().
             auth().preemptive().basic("webinar5", "webinar5").
             header("Content-Type", "application/json").
-            body(issueJson).
+            body(issueJSON).
             when().
             post("https://jira.hillel.it/rest/api/2/issue").
             then().
@@ -88,7 +71,7 @@ public class JIRAApiTest {
     Response getDeletedIssue=given().
             auth().preemptive().basic("webinar5", "webinar5").
             header("Content-Type", "application/json").
-            body(issueJson).
+            body(issueJSON).
             when().
             get("https://jira.hillel.it/rest/api/2/issue/" + issueKey).
             then().
