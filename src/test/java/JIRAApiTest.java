@@ -29,9 +29,15 @@ public class JIRAApiTest {
     assertTrue(matcher.matches("WEBINAR-8887"));
     System.out.println(matcher.matches("WEBINAR-8887"));
   }
+
   @Feature("Create Issue Jira")
   @Test(groups = {"Regression"})
-  public void createIssue() {
+  public void createAndDeleteIssue() throws InterruptedException {
+
+    String credentialsJSON = "{" +
+            "\"username\": \"webinar5\"," +
+            "\"password\": \"webinar5\"" +
+            "} ";
 
     String issueJson = "{\n" +
             "    \"fields\": {\n" +
@@ -50,6 +56,8 @@ public class JIRAApiTest {
             "        }\n" +
             "    }\n" +
             "}";
+
+        //create issue
     Response response = given().
             auth().preemptive().basic("webinar5", "webinar5").
             header("Content-Type", "application/json").
@@ -59,7 +67,37 @@ public class JIRAApiTest {
             then().
             extract().response();
     assertEquals(201, response.statusCode());
-    System.out.println("Status code:"+response.statusCode());
+    System.out.println("Status code:" + response.statusCode());
+
+//выводим Response
+    String responseBody = response.then().extract().asString();
+    System.out.printf("\nRESPONSE: " + responseBody);
+    String issueKey =  response.then().extract().path("key");//получаем ключ
+
+//Delete issue
+    Response deleteIssue = given().
+                    auth().preemptive().basic("webinar5", "webinar5").
+                    when().
+                    delete("https://jira.hillel.it/rest/api/2/issue/"+issueKey).
+                    then().
+                    extract().response();
+              assertEquals(deleteIssue.statusCode(), 204);
+    System.out.println("\nStatus code:" + deleteIssue.statusCode());
+
+//проверка на то, что мы хотим получить только чтоудаленный тикет
+    Response getDeletedIssue=given().
+            auth().preemptive().basic("webinar5", "webinar5").
+            header("Content-Type", "application/json").
+            body(issueJson).
+            when().
+            get("https://jira.hillel.it/rest/api/2/issue/" + issueKey).
+            then().
+            extract().response();
+    assertEquals(getDeletedIssue.statusCode(), 404);
+    System.out.println("Status code:" + getDeletedIssue.statusCode());
+    String responseBodygetDelete = getDeletedIssue.then().extract().asString();
+    System.out.printf("\nRESPONSE: " + responseBodygetDelete);
+
   }
   }
 
